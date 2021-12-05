@@ -12,7 +12,7 @@ struct line {
 
 int main() {
   struct line lines[LINE_BUFFER];
-  int lineCount;
+  int lineCount = 0;
   int width = 0, height = 0;
   int i, result = 0;
   int *grid;

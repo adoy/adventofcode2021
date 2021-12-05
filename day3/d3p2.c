@@ -7,8 +7,8 @@
 
 int main() {
   int *numbers, *search, *bit1, *bit0;
-  size_t numbersSize = NUMBER_BUFFER_SIZE;
-  size_t numbersCount = 0, searchCount, countBit1, countBit0;
+  int numbersSize = NUMBER_BUFFER_SIZE;
+  int numbersCount = 0, searchCount, countBit1, countBit0;
   int i, j, bitCount;
 
   int oxygenRating = 0, co2rating = 0;

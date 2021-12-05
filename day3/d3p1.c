@@ -10,8 +10,8 @@ int main() {
   char *line;
 
   size_t bufferSize = INITIAL_BITCOUNTER_BUFFER_SIZE;
-  int bitCount = 0;
-  int i = 0;
+  unsigned int bitCount = 0;
+  unsigned int i = 0;
   char *c = NULL;
 
   int gamma = 0;

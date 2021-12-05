@@ -23,7 +23,8 @@ typedef struct Board {
 } Board;
 
 int validateBoardLine(Board *board, int line) {
-  for (int row = 0; row < BOARD_ROWS; row++) {
+  int row;
+  for (row = 0; row < BOARD_ROWS; row++) {
     if (!getCell(board, line, row).checked) {
       return 0;
     }
@@ -32,7 +33,8 @@ int validateBoardLine(Board *board, int line) {
 }
 
 int validateBoardColumn(Board *board, int column) {
-  for (int line = 0; line < BOARD_LINES; line++) {
+  int line;
+  for (line = 0; line < BOARD_LINES; line++) {
     if (!getCell(board, line, column).checked) {
       return 0;
     }
@@ -41,8 +43,8 @@ int validateBoardColumn(Board *board, int column) {
 }
 
 int computeScore(Board board, int number) {
-  int result = 0;
-  for (int i = 0; i < BOARD_CELLS; i++) {
+  int result = 0, i;
+  for (i = 0; i < BOARD_CELLS; i++) {
     if (!board.cells[i].checked)
       result += board.cells[i].val;
   }
