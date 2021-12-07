@@ -3,9 +3,6 @@
 
 #define LINE_BUFFER 500
 
-#define is_horizontal(l) (l->x1 == l->x2)
-#define is_vertical(l) (l->y1 == l->y2)
-
 struct line {
   int x1, y1, x2, y2;
 };
