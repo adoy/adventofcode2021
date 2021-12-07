@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -O3
+CFLAGS=-Wall -Wextra -ansi -O3
 
 SRC = $(wildcard */*.c)
 BIN = $(SRC:.c=)
