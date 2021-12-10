@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define LINE_BUFFER 500
 
@@ -14,6 +17,10 @@ int main() {
   int i, result = 0;
   int distance, xinc, yinc;
   int *grid;
+
+#ifdef BENCH
+  clock_t start = clock();
+#endif
 
   while (fscanf(stdin, "%d,%d -> %d,%d", &lines[lineCount].x1, &lines[lineCount].y1, &lines[lineCount].x2, &lines[lineCount].y2) == 4) {
     if (lines[lineCount].x1 > width) width = lines[lineCount].x1;
@@ -46,6 +53,10 @@ int main() {
   }
 
   free(grid);
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Result: %d\n", result);
 

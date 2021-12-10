@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define LINE_BUFFER_SIZE   15
 #define NUMBER_BUFFER_SIZE 1000
@@ -12,6 +15,10 @@ int main() {
   int i, j, bitCount;
 
   int oxygenRating = 0, co2rating = 0;
+
+#ifdef BENCH
+  clock_t start = clock();
+#endif
 
   numbers = (int *)malloc(sizeof(int) * numbersSize);
 
@@ -91,6 +98,10 @@ int main() {
   free(search);
   free(bit1);
   free(bit0);
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Oxygen rating: %d\nCO2 rating: %d\nResult: %d", oxygenRating, co2rating, oxygenRating * co2rating);
 

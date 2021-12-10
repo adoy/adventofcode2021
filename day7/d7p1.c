@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define BUFFER_SIZE 1000
 
@@ -10,6 +13,10 @@ int main() {
   int count = 0;
   int i, med;
   int result = 0;
+
+#ifdef BENCH
+  clock_t start = clock();
+#endif
 
   while (fscanf(stdin, "%d,", &positions[count]) > 0) {
     count++;
@@ -25,6 +32,10 @@ int main() {
   for (i = 0; i < count; i++) {
     result += abs(med - positions[i]);
   }
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Result: %d\n", result);
 

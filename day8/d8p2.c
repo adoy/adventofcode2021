@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define LINE_BUFFER_SIZE 255
 
@@ -165,11 +168,19 @@ int main() {
   char str[LINE_BUFFER_SIZE];
   int result = 0;
 
+#ifdef BENCH
+  clock_t start = clock();
+#endif
+
   while (fgets(str, LINE_BUFFER_SIZE, stdin)) {
     line_t l = {0};
     parseLine(str, &l);
     result += processLine(&l);
   }
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Result: %d\n", result);
 

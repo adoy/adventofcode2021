@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define INITIAL_BITCOUNTER_BUFFER_SIZE 13
 #define INITIAL_LINE_BUFFER_SIZE INITIAL_BITCOUNTER_BUFFER_SIZE + 2
@@ -16,6 +19,10 @@ int main() {
 
   int gamma = 0;
   int epsilon = 0;
+
+#ifdef BENCH
+  clock_t start = clock();
+#endif
 
   line = (char *)malloc(sizeof(char) * INITIAL_LINE_BUFFER_SIZE);
 
@@ -50,6 +57,10 @@ int main() {
   for (i = 0; i < bitCount; i++) {
     *((bitCounter[i] > 1) ? &gamma : &epsilon) |= 1 << (bitCount - 1 - i);
   }
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Gamma: %d\nEpsilon: %d\n", gamma, epsilon);
   printf("Result: %d\n", epsilon * gamma);

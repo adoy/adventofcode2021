@@ -6,6 +6,9 @@ BIN = $(SRC:.c=)
 
 all: $(BIN)
 
+bench: CFLAGS += -DBENCH
+bench: $(BIN)
+
 % : %.c
 	$(CC) $(CFLAGS) $^ -o $@
 

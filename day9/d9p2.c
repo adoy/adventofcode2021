@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define MAX_LINES 1000
 #define MAX_ROWS 100
@@ -45,6 +48,10 @@ int main() {
   char *line = grid;
   int biggestBassinsSize[3] = {0};
 
+#ifdef BENCH
+  clock_t start = clock();
+#endif
+
   while (height <= MAX_LINES && fgets(line, MAX_ROWS + 2, stdin)) {
     if (!width) {
       width = strlen(line) - 1;
@@ -68,6 +75,10 @@ int main() {
       }
     }
   }
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Result: %d\n",
          biggestBassinsSize[0] * biggestBassinsSize[1] * biggestBassinsSize[2]);

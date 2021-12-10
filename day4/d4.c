@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define LINE_BUFFER 500
 #define DRAW_BUFFER 101
@@ -81,6 +84,10 @@ int main() {
   Board boards[BOARD_COUNT];
   Board *winner = NULL, *loser;
 
+#ifdef BENCH
+  clock_t start = clock();
+#endif
+
   fscanf(stdin, "%d", draw++);
   while (fscanf(stdin, ",%d", draw) > 0) draw++;
   *draw = -1;
@@ -111,6 +118,10 @@ int main() {
     }
     draw++;
   }
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   if (winner) {
     printf("Winner board score: %d\n", winner->score);

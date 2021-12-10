@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define LINE_BUFFER_SIZE 150
 #define MAX_LINE_COUNT 110
@@ -79,6 +82,10 @@ int main() {
   int incompleteCount = 0;
   long score;
 
+#ifdef BENCH
+  clock_t start = clock();
+#endif
+
   while (fgets(line, LINE_BUFFER_SIZE + 2, stdin)) {
     if ((score = getLineScore(line))) {
       incompleteScores[incompleteCount++] = score;
@@ -86,6 +93,10 @@ int main() {
   }
 
   qsort(incompleteScores, incompleteCount, sizeof(long), cmp);
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Result: %ld\n", incompleteScores[incompleteCount / 2]);
 
