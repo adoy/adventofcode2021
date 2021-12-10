@@ -12,7 +12,19 @@
 #define BOARD_ROWS 5
 #define BOARD_CELLS (BOARD_LINES * BOARD_ROWS)
 
-#define getCell(board, line, row) board->cells[line * BOARD_LINES + row]
+#define getCell(board, line, row) (board->cells[(line) * BOARD_LINES + (row)])
+
+#define validateBoardLine(board, line)                                         \
+  (getCell(board, line, 0).checked && getCell(board, line, 1).checked &&       \
+   getCell(board, line, 2).checked && getCell(board, line, 3).checked &&       \
+   getCell(board, line, 4).checked)
+#define validateBoardColumn(board, column)                                     \
+  (getCell(board, 0, column).checked && getCell(board, 1, column).checked &&   \
+   getCell(board, 2, column).checked && getCell(board, 3, column).checked &&   \
+   getCell(board, 4, column).checked)
+
+#define BOARD_NUMBER(i) ((i) / BOARD_CELLS)
+#define CELL_NUMBER(i) ((i) % 25)
 
 typedef struct Cell {
   int val;
@@ -25,26 +37,6 @@ typedef struct Board {
   int score;
 } Board;
 
-int validateBoardLine(Board *board, int line) {
-  int row;
-  for (row = 0; row < BOARD_ROWS; row++) {
-    if (!getCell(board, line, row).checked) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-int validateBoardColumn(Board *board, int column) {
-  int line;
-  for (line = 0; line < BOARD_LINES; line++) {
-    if (!getCell(board, line, column).checked) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
 int computeScore(Board board, int number) {
   int result = 0, i;
   for (i = 0; i < BOARD_CELLS; i++) {
@@ -55,20 +47,12 @@ int computeScore(Board board, int number) {
   return result * number;
 }
 
-int validateBoard(Board *board, int number) {
-  int i;
-  for (i = 0; 0 == board->won && i < BOARD_LINES; i++) {
-    if (validateBoardLine(board, i)) {
-      board->won = 1;
-      board->score = computeScore(*board, number);
-    }
+int validateBoard(Board *board, int cell) {
+  if (validateBoardLine(board, cell / 5) || validateBoardColumn(board, cell % 5)) {
+    board->won = 1;
+    board->score = computeScore(*board, board->cells[cell].val);
   }
-  for (i = 0; 0 == board->won && i < BOARD_ROWS; i++) {
-    if (validateBoardColumn(board, i)) {
-      board->won = 1;
-      board->score = computeScore(*board, number);
-    }
-  }
+
   return board->won;
 }
 
@@ -82,7 +66,7 @@ int main() {
   int i;
 
   Board boards[BOARD_COUNT];
-  Board *winner = NULL, *loser;
+  Board *winner = NULL, *loser = NULL;
 
 #ifdef BENCH
   clock_t start = clock();
@@ -95,7 +79,7 @@ int main() {
   while (fscanf(stdin, "%d", &cells[cellCount].val) > 0) {
     cells[cellCount++].checked = 0;
   }
-  boardCount = cellCount / BOARD_CELLS;
+  boardCount = BOARD_NUMBER(cellCount);
 
   for (i = 0; i < boardCount; i++) {
     boards[i].won = 0;
@@ -106,14 +90,15 @@ int main() {
   while (*draw != -1) {
     for (i = 0; i < cellCount; i++) {
       if (*draw == cells[i].val) {
-        cells[i].checked = 1;
-      }
-    }
-
-    for (i = 0; i < boardCount; i++) {
-      if (!boards[i].won && validateBoard(&boards[i], *draw)) {
-        if (NULL == winner) winner = &boards[i];
-        loser = &boards[i];
+        if (!boards[BOARD_NUMBER(i)].won) {
+          cells[i].checked = 1;
+          if (validateBoard(&boards[BOARD_NUMBER(i)], CELL_NUMBER(i))) {
+            if (NULL == winner)
+              winner = &boards[BOARD_NUMBER(i)];
+            loser = &boards[BOARD_NUMBER(i)];
+          }
+        }
+        i += BOARD_CELLS - CELL_NUMBER(i);
       }
     }
     draw++;
