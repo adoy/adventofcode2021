@@ -8,6 +8,11 @@ all: $(BIN)
 
 bench: CFLAGS += -DBENCH
 bench: $(BIN)
+	@for i in $(BIN); do \
+		echo $$i; \
+		cat `dirname $$i`/input.txt | $$i; \
+		echo ;\
+	done
 
 % : %.c
 	$(CC) $(CFLAGS) $^ -o $@
