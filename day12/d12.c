@@ -111,15 +111,17 @@ static void freeCaveList(caveList_t *list, int fc) {
   }
 }
 
-static int visit(cave_t *cave, caveList_t *visited) {
+static int visit(cave_t *cave, caveList_t *visited, int twice) {
   int r = 0, fv = 0;
   caveList_t *connections = cave->connections;
 
-  if (IS_END == cave->flags)
+  if (0 == strcmp(cave->name, "end"))
     return 1;
   if (isSmall(cave)) {
     if (isCaveInList(visited, cave)) {
-      return 0;
+      if (twice)
+        return 0;
+      twice = 1;
     } else {
       visited = addCaveToList(visited, cave);
       fv = 1;
@@ -127,7 +129,7 @@ static int visit(cave_t *cave, caveList_t *visited) {
   }
 
   while (connections) {
-    r += visit(connections->cave, visited);
+    r += visit(connections->cave, visited, twice);
     connections = connections->next;
   }
 
@@ -139,19 +141,22 @@ static int visit(cave_t *cave, caveList_t *visited) {
 }
 
 int main() {
-  int result;
+  int result1, result2;
 #ifdef BENCH
   clock_t start = clock();
 #endif
   caveList_t *caves = initCaveList(stdin);
-  result = visit(findCaveInList(caves, "start"), NULL);
+  cave_t *cave = findCaveInList(caves, "start");
+  result1 = visit(cave, NULL, 1);
+  result2 = visit(cave, NULL, 0);
   freeCaveList(caves, 1);
 
 #ifdef BENCH
   printf("Elapse: %f\n", ((double)clock() - start) / CLOCKS_PER_SEC);
 #endif
 
-  printf("Result: %d\n", result);
+  printf("Result1: %d\n", result1);
+  printf("Result2: %d\n", result2);
 
   return 0;
 }
