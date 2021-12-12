@@ -25,19 +25,18 @@ struct caveList {
 typedef struct cave cave_t;
 typedef struct caveList caveList_t;
 
-static caveList_t *addCaveToList(caveList_t *list, cave_t *cave) {
+static void addCaveToList(caveList_t **list, cave_t *cave) {
   caveList_t *new = (caveList_t *)malloc(sizeof(caveList_t));
   new->cave = cave;
-  new->next = list;
+  new->next = *list;
 
-  return new;
+  *list = new;
 }
 
 static cave_t *findCaveInList(caveList_t *list, const char *name) {
   while (list) {
-    if (0 == strcmp(name, list->cave->name)) {
+    if (0 == strcmp(name, list->cave->name))
       return list->cave;
-    }
     list = list->next;
   };
 
@@ -51,14 +50,13 @@ static cave_t *findOrCreateCaveInList(caveList_t **list, const char *name) {
     cave = (cave_t *)malloc(sizeof(cave_t));
     cave->name = strdup(name);
     cave->connections = NULL;
-    if (0 == strcmp("start", name)) {
+    if (0 == strcmp("start", name))
       cave->flags = IS_START;
-    } else if (0 == strcmp("end", name)) {
+    else if (0 == strcmp("end", name))
       cave->flags = IS_END;
-    } else {
+    else
       cave->flags = 0;
-    }
-    *list = addCaveToList(*list, cave);
+    addCaveToList(list, cave);
   }
 
   return cave;
@@ -82,12 +80,10 @@ static caveList_t *initCaveList(FILE *fp) {
   while (fscanf(fp, "%[^-]s", name1) == 1 && fscanf(fp, "-%s\n", name2) == 1) {
     cave_t *cave1 = findOrCreateCaveInList(&list, name1);
     cave_t *cave2 = findOrCreateCaveInList(&list, name2);
-    if (IS_START != cave2->flags) {
-      cave1->connections = addCaveToList(cave1->connections, cave2);
-    }
-    if (IS_START != cave1->flags) {
-      cave2->connections = addCaveToList(cave2->connections, cave1);
-    }
+    if (IS_START != cave2->flags)
+      addCaveToList(&cave1->connections, cave2);
+    if (IS_START != cave1->flags)
+      addCaveToList(&cave2->connections, cave1);
   }
 
   return list;
@@ -123,7 +119,7 @@ static int visit(cave_t *cave, caveList_t *visited, int twice) {
         return 0;
       twice = 1;
     } else {
-      visited = addCaveToList(visited, cave);
+      addCaveToList(&visited, cave);
       fv = 1;
     }
   }
