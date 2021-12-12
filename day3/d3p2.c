@@ -103,7 +103,7 @@ int main() {
   printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
 #endif
 
-  printf("Oxygen rating: %d\nCO2 rating: %d\nResult: %d", oxygenRating, co2rating, oxygenRating * co2rating);
+  printf("Oxygen rating: %d\nCO2 rating: %d\nResult: %d\n", oxygenRating, co2rating, oxygenRating * co2rating);
 
   return 0;
 }
