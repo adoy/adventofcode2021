@@ -89,7 +89,7 @@ void insertHeap(minHeap *heap, int x, int y, int risk) {
                                           sizeof(struct state *) * heap->size);
   }
 
-  if (0 == heap->size) {
+  if (0 == heap->count) {
     heap->data[0] = state;
     heap->count++;
   } else {
