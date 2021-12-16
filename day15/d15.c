@@ -9,6 +9,16 @@
 #define MAX_LINES 100
 #define MAX_ROWS 100
 
+#define parentIndex(i) (((i)-1) / 2)
+#define leftChildIndex(i) (2 * (i) + 1)
+#define rightChildIndex(i) (2 * (i) + 2)
+#define swap(a, b)                                                             \
+  do {                                                                         \
+    struct state *tmp = a;                                                     \
+    a = b;                                                                     \
+    b = tmp;                                                                   \
+  } while (0)
+
 #define IS_INBOUND(g, x, y)                                                    \
   ((x) < (g)->width && (x) >= 0 && (y) >= 0 && (y) < g->height)
 #define VAL(g, x, y) ((g)->grid[(y) * (g)->width + (x)])
@@ -20,45 +30,93 @@ typedef struct {
   int width, height;
 } grid_t;
 
-typedef struct pq {
-  int x, y, risk;
-  struct pq *next;
-} pq_t;
+typedef struct {
+  int size;
+  int count;
+  struct state {
+    int x;
+    int y;
+    int risk;
+  } * *data;
+} minHeap;
 
-void freePq(pq_t *pq) {
-  pq_t *next;
-  while (pq) {
-    next = pq->next;
-    free(pq);
-    pq = next;
+minHeap *initHeap(size_t initialSize) {
+  minHeap *heap = (minHeap *)malloc(sizeof(minHeap));
+  heap->size = initialSize;
+  heap->count = 0;
+  heap->data = (struct state **)malloc(sizeof(struct state *) * heap->size);
+
+  return heap;
+}
+
+void siftUp(minHeap *heap, int ci) {
+  int pi = parentIndex(ci);
+  while (pi >= 0 && heap->data[pi]->risk > heap->data[ci]->risk) {
+    swap(heap->data[pi], heap->data[ci]);
+    ci = pi;
+    pi = parentIndex(ci);
   }
 }
 
-pq_t *pqPop(pq_t **pq) {
-  pq_t *head = *pq;
-  if (head) {
-    *pq = head->next;
-  }
-  return head;
-}
+void siftDown(minHeap *heap, int pi) {
+  int lci = leftChildIndex(pi);
 
-void pqPush(pq_t **pq, int x, int y, int risk) {
-  pq_t *new = (pq_t *)malloc(sizeof(pq_t));
-  new->x = x;
-  new->y = y;
-  new->risk = risk;
-
-  if (NULL == *pq || risk <= (*pq)->risk) {
-    new->next = *pq;
-    *pq = new;
-  } else {
-    pq_t *current = *pq;
-    while (NULL != current->next && risk > current->next->risk) {
-      current = current->next;
+  while (lci < heap->count) {
+    int sci = lci;
+    int rci = rightChildIndex(pi);
+    if (rci < heap->count && heap->data[rci]->risk < heap->data[lci]->risk) {
+      sci = rci;
     }
-    new->next = current->next;
-    current->next = new;
+    if (heap->data[sci]->risk < heap->data[pi]->risk) {
+      swap(heap->data[sci], heap->data[pi]);
+      pi = sci;
+      lci = leftChildIndex(pi);
+    } else {
+      break;
+    }
   }
+}
+
+void insertHeap(minHeap *heap, int x, int y, int risk) {
+  struct state *state = (struct state *)malloc(sizeof(struct state));
+  state->x = x;
+  state->y = y;
+  state->risk = risk;
+
+  if (heap->size == heap->count) {
+    heap->size *= 2;
+    heap->data = (struct state **)realloc(heap->data,
+                                          sizeof(struct state *) * heap->size);
+  }
+
+  if (0 == heap->size) {
+    heap->data[0] = state;
+    heap->count++;
+  } else {
+    int ci = heap->count;
+    heap->data[heap->count++] = state;
+    siftUp(heap, ci);
+  }
+}
+
+struct state *popHeap(minHeap *heap) {
+  if (heap->count == 0) {
+    return NULL;
+  } else {
+    swap(heap->data[0], heap->data[heap->count - 1]);
+    heap->count--;
+    siftDown(heap, 0);
+    return heap->data[heap->count];
+  }
+}
+
+void freeHeap(minHeap *heap) {
+  int i = 0;
+  for (i = 0; i < heap->count; i++) {
+    free(heap->data[i]);
+  }
+  free(heap->data);
+  free(heap);
 }
 
 grid_t *gridInit(FILE *fp) {
@@ -95,7 +153,8 @@ grid_t *gridMultiply(grid_t *grid, int factor) {
 
   for (y = 0; y < new->height; y++) {
     for (x = 0; x < new->width; x++) {
-      int8_t v = VAL(grid, y % grid->height, x % grid->width) + (x / grid->width) + (y / grid->height);
+      int8_t v = VAL(grid, y % grid->height, x % grid->width) +
+                 (x / grid->width) + (y / grid->height);
       new->grid[y * new->width + x] = v > 9 ? v % 9 : v;
     }
   }
@@ -105,11 +164,12 @@ grid_t *gridMultiply(grid_t *grid, int factor) {
 
 int calculateRisk(grid_t *grid) {
   int x, y, risk = 0;
-  pq_t *current, *pq = NULL;
-  pqPush(&pq, 0, 0, 0);
 
-  while (pq) {
-    current = pqPop(&pq);
+  minHeap *heap = initHeap(5);
+  insertHeap(heap, 0, 0, 0);
+
+  while (heap->count) {
+    struct state *current = popHeap(heap);
     x = current->x;
     y = current->y;
     risk = current->risk;
@@ -121,21 +181,21 @@ int calculateRisk(grid_t *grid) {
     SET_VISITED(grid, x, y);
 
     if (x == grid->width - 1 && y == grid->height - 1) {
-      freePq(pq);
+      freeHeap(heap);
       return risk;
     }
 
     if (IS_INBOUND(grid, x - 1, y))
-      pqPush(&pq, x - 1, y, risk + VAL(grid, x - 1, y));
+      insertHeap(heap, x - 1, y, risk + VAL(grid, x - 1, y));
     if (IS_INBOUND(grid, x + 1, y))
-      pqPush(&pq, x + 1, y, risk + VAL(grid, x + 1, y));
+      insertHeap(heap, x + 1, y, risk + VAL(grid, x + 1, y));
     if (IS_INBOUND(grid, x, y - 1))
-      pqPush(&pq, x, y - 1, risk + VAL(grid, x, y - 1));
+      insertHeap(heap, x, y - 1, risk + VAL(grid, x, y - 1));
     if (IS_INBOUND(grid, x, y + 1))
-      pqPush(&pq, x, y + 1, risk + VAL(grid, x, y + 1));
+      insertHeap(heap, x, y + 1, risk + VAL(grid, x, y + 1));
   }
 
-  freePq(pq);
+  freeHeap(heap);
   exit(1);
 }
 
