@@ -72,7 +72,6 @@ static snailfishNumber *createNumber(int val) {
 }
 
 static snailfishNumber *parseSnailfishNumber(char **str) {
-  int n;
   snailfishNumber *sn = (snailfishNumber *)malloc(sizeof(snailfishNumber));
   sn->flags = TYPE_NODE;
   sn->parent = NULL;
@@ -80,8 +79,7 @@ static snailfishNumber *parseSnailfishNumber(char **str) {
   if (**str == '[') {
     setLeft(sn, parseSnailfishNumber(str));
   } else {
-    sscanf(*str, "%d", &n);
-    setLeft(sn, createNumber(n));
+    setLeft(sn, createNumber((**str)-'0'));
     (*str)++;
   }
   sn->left->parent = sn;
@@ -90,8 +88,7 @@ static snailfishNumber *parseSnailfishNumber(char **str) {
   if (**str == '[') {
     setRight(sn, parseSnailfishNumber(str));
   } else {
-    sscanf(*str, "%d", &n);
-    setRight(sn, createNumber(n));
+    setRight(sn, createNumber((**str)-'0'));
     (*str)++;
   }
   sn->right->parent = sn;
