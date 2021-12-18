@@ -79,4 +79,6 @@ int main() {
 #endif
 
   printf("Result1: %d\nResult2: %d\n", result1, result2);
+
+  return 0;
 }
