@@ -1,6 +1,9 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BENCH
+#include <time.h>
+#endif
 
 #define DIE_SIDES 3
 
@@ -39,10 +42,18 @@ int main() {
   player_t players[2] = {0};
   results_t results;
 
+#ifdef BENCH
+  clock_t start = clock();
+#endif
+
   fscanf(stdin, "Player 1 starting position: %hhd\n", &players[0].pos);
   fscanf(stdin, "Player 2 starting position: %hhd\n", &players[1].pos);
 
   results = play(players[0], &players[1]);
+
+#ifdef BENCH
+  printf("Elapse: %f\n", ((double) clock() - start) / CLOCKS_PER_SEC);
+#endif
 
   printf("Results=%ld\n", results.p1 > results.p2 ? results.p1 : results.p2);
 
